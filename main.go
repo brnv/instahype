@@ -13,16 +13,20 @@ var (
 	version = "[manual build]"
 )
 
-const usage = `name
+const usage = `instahype
 
 Usage:
-    name [options]
-    name -h | --help
+    instahype [options]
+    instahype -h | --help
 
 Options:
-    --debug    Enable debug output.
-    --trace    Enable trace output.
-    -h --help  Show this help.
+    --session-id <string>  Use specific session.
+    --username <string>    Username to login to Instagram (if no session id specified).
+    --password <string>    Password to login to Instagram (if no session id specified).
+    --tag <string>         Hashtag to search for [default: guitar].
+    --debug                Enable debug output.
+    --trace                Enable trace output.
+    -h --help              Show this help.
 `
 
 func main() {
@@ -39,13 +43,34 @@ func main() {
 	}
 
 	var (
-		hashtag   = ""
-		sessionID = ""
+		err error
+
+		sessionID string
+		hashtag   = args["--tag"].(string)
 	)
+
+	if args["--session-id"] != nil {
+		sessionID = args["--session-id"].(string)
+	}
+
+	if sessionID == "" {
+		logger.Trace("login to Instagram")
+
+		password := args["--password"].(string)
+		username := args["--username"].(string)
+
+		sessionID, err = login(username, password)
+		if err != nil {
+			logger.Fatalf("can't login: %s", err.Error())
+		}
+	}
+
+	logger.Debugf("hashtag: %s", hashtag)
+	logger.Debugf("session id: %s", sessionID)
 
 	rand.Seed(time.Now().UnixNano())
 
-	goalCount := rand.Intn(20) + 90
+	goalCount := rand.Intn(10) + 40
 
 	count := 0
 
