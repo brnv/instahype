@@ -1,0 +1,7 @@
+[Unit]
+Description=Run instahype
+
+[Service]
+Type=simple
+EnvironmentFile=/home/operator/sources/instahype/env.conf
+ExecStart=/home/operator/sources/instahype/instahype --session-id $SESSIONID --debug --trace
