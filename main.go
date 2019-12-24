@@ -20,13 +20,14 @@ Usage:
     instahype -h | --help
 
 Options:
-    --session-id <string>  Use specific session.
-    --username <string>    Username to login to Instagram (if no session id specified).
-    --password <string>    Password to login to Instagram (if no session id specified).
-    --tag <string>         Hashtag to search for [default: guitar].
-    --debug                Enable debug output.
-    --trace                Enable trace output.
-    -h --help              Show this help.
+    --session-id <string>   Use specific session.
+    --username <string>     Username to login to Instagram (if no session id specified).
+    --password <string>     Password to login to Instagram (if no session id specified).
+    --tag <string>          Hashtag to search for [default: guitar].
+    --debug                 Enable debug output.
+    --trace                 Enable trace output.
+    --use-chromium-session  Try to get session id from Chromium browser cookies.
+    -h --help               Show this help.
 `
 
 func main() {
@@ -49,15 +50,32 @@ func main() {
 		hashtag   = args["--tag"].(string)
 	)
 
-	if args["--session-id"] != nil {
+	if args["--use-chromium-session"].(bool) {
+		logger.Trace("use chromium session")
+		sessionID, err = getChromiumSession()
+		if err != nil {
+			logger.Fatal(err)
+		}
+	} else if args["--session-id"] != nil {
+		logger.Trace("use provided session id")
 		sessionID = args["--session-id"].(string)
 	}
 
 	if sessionID == "" {
 		logger.Trace("login to Instagram")
 
-		password := args["--password"].(string)
-		username := args["--username"].(string)
+		var (
+			password string
+			username string
+		)
+
+		if args["--password"] != nil {
+			password = args["--password"].(string)
+		}
+
+		if args["--username"] != nil {
+			username = args["--username"].(string)
+		}
 
 		sessionID, err = login(username, password)
 		if err != nil {
