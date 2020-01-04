@@ -11,13 +11,12 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
-func getChromiumSession() (string, error) {
+func getSessionFromCookies(cookiesPath string) (string, error) {
 	var (
-		dbPath             = "/home/operator/.config/chromium/Default/Cookies"
 		encryptedSessionID string
 	)
 
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", cookiesPath)
 	if err != nil {
 		return "", err
 	}

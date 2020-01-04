@@ -3,5 +3,4 @@ Description=Run instahype
 
 [Service]
 Type=simple
-EnvironmentFile=/home/operator/sources/instahype/env.conf
-ExecStart=/home/operator/sources/instahype/instahype --use-chromium-session
+ExecStart=/usr/bin/instahype --cookies-db /var/cache/instahype/cookies.db --start-delay

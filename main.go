@@ -24,9 +24,10 @@ Options:
     --username <string>     Username to login to Instagram (if no session id specified).
     --password <string>     Password to login to Instagram (if no session id specified).
     --tag <string>          Hashtag to search for [default: guitar].
+    --start-delay           Wait short delay before start work.
     --debug                 Enable debug output.
     --trace                 Enable trace output.
-    --use-chromium-session  Try to get session id from Chromium browser cookies.
+    --cookies-db <path>     Get session id from sqlite cookies database.
     -h --help               Show this help.
 `
 
@@ -50,9 +51,17 @@ func main() {
 		hashtag   = args["--tag"].(string)
 	)
 
-	if args["--use-chromium-session"].(bool) {
+	rand.Seed(time.Now().UnixNano())
+
+	if args["--start-delay"].(bool) {
+		startDelay := time.Second * time.Duration(rand.Intn(600)+180)
+		logger.Infof("wait for %s before work", startDelay)
+		time.Sleep(startDelay)
+	}
+
+	if args["--cookies-db"] != nil {
 		logger.Trace("use chromium session")
-		sessionID, err = getChromiumSession()
+		sessionID, err = getSessionFromCookies(args["--cookies-db"].(string))
 		if err != nil {
 			logger.Fatal(err)
 		}
@@ -128,7 +137,7 @@ func main() {
 				break
 			}
 
-			waitInterval := time.Second * (time.Duration)(rand.Intn(7)+14)
+			waitInterval := time.Second * time.Duration(rand.Intn(7)+14)
 
 			logger.Debugf("sleep delay: %s", waitInterval.String())
 
