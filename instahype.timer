@@ -2,9 +2,7 @@
 Description=Run instahype
 
 [Timer]
-OnBootSec=0
-OnUnitActive=7600
-AccuracySec=1
+OnCalendar=0/1:00:00
 
 [Install]
 WantedBy=timers.target
