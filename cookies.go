@@ -70,6 +70,7 @@ func decryptCookie(value string) (string, error) {
 
 	result = strings.Trim(string(decryptedValue), "\x00")
 	result = strings.Trim(result, "\x10")
+	result = strings.Trim(result, "\x01")
 
 	return result, nil
 }
