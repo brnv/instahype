@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/kovetskiy/godocs"
@@ -122,10 +123,23 @@ func main() {
 
 			err = setLike(video.ID, sessionID)
 			if err != nil {
-				logger.Errorf(
-					"media id: %s, error: %s",
-					video.Shortcode, err.Error(),
-				)
+				switch getErrorTyped(err).(type) {
+				case ErrorMediaNotExist:
+					logger.Errorf(
+						"media %s was deleted", video.Shortcode,
+					)
+
+				case ErrorPossibleBan:
+					logger.Fatalf("ban possibility occured, exit")
+
+				default:
+					logger.Errorf(
+						"media id: %s, error: %s",
+						video.Shortcode, err.Error(),
+					)
+
+				}
+
 				continue
 			}
 
@@ -144,4 +158,34 @@ func main() {
 			time.Sleep(waitInterval)
 		}
 	}
+}
+
+type ErrorMediaNotExist struct {
+	err error
+}
+
+type ErrorPossibleBan struct {
+	err error
+}
+
+func getErrorTyped(err error) interface{} {
+	if strings.Contains(err.Error(), "invalid character 'S'") {
+		return ErrorMediaNotExist{
+			err: err,
+		}
+	}
+
+	if strings.Contains(err.Error(), "invalid character '<'") {
+		return ErrorPossibleBan{
+			err: err,
+		}
+	}
+
+	if strings.Contains(err.Error(), "invalid character 'P'") {
+		return ErrorPossibleBan{
+			err: err,
+		}
+	}
+
+	return err
 }
